@@ -1,4 +1,4 @@
-# Ledgerly
+# Ledger - Finance Manager
 
 A personal income & expense ledger built with Vite + React + Tailwind CSS + Supabase, ready to deploy on Vercel.
 
