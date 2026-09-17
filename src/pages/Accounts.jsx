@@ -19,15 +19,19 @@ export default function Accounts() {
   const total = accounts
     .filter((a) => a.type !== 'credit_card')
     .reduce((sum, a) => sum + Number(a.balance), 0)
+  const bankTotal = accounts.filter((a) => a.type === 'bank').reduce((sum, a) => sum + Number(a.balance), 0)
+  const cashTotal = accounts.filter((a) => a.type === 'cash').reduce((sum, a) => sum + Number(a.balance), 0)
 
   return (
     <AppShell title="Accounts">
       <div className="">
-        <div className="mb-8">
-          <p className="text-sm text-ink-400">Net across accounts</p>
-          <p className="font-display text-4xl text-ink-900 dark:text-paper">
-            {formatMoney(total, accounts[0]?.currency ?? 'INR')}
-          </p>
+        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+          {[['Net across accounts', total], ['Bank balance', bankTotal], ['Cash in hand', cashTotal]].map(([label, value]) => (
+            <div key={label} className="rounded-md border border-hairline p-5 dark:border-hairline-dark">
+              <p className="text-sm text-ink-400">{label}</p>
+              <p className="mt-1 font-display text-3xl text-ink-900 dark:text-paper">{formatMoney(value, accounts[0]?.currency ?? 'INR')}</p>
+            </div>
+          ))}
         </div>
 
         <div className="mb-4 flex items-center justify-between">

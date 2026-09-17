@@ -6,6 +6,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Accounts from './pages/Accounts'
+import Loans from './pages/Loans'
 import Categories from './pages/Categories'
 import Budgets from './pages/Budgets'
 import Recurring from './pages/Recurring'
@@ -51,6 +52,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Accounts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/loans"
+          element={
+            <ProtectedRoute>
+              <Loans />
             </ProtectedRoute>
           }
         />

@@ -37,8 +37,12 @@ export default function TransactionModal({
   const onSubmit = async (e) => {
     e.preventDefault()
     if (!form.account_id) return
+    // `initial` comes from Supabase with joined `categories` and `accounts`
+    // objects. Those are read-only relation data and must never be sent back
+    // as columns when updating the transactions row.
+    const { categories: _categories, accounts: _accounts, id: _id, user_id: _userId, created_at: _createdAt, ...transactionForm } = form
     const payload = {
-      ...form,
+      ...transactionForm,
       amount: Number(form.amount),
       category_id: form.category_id || null,
     }

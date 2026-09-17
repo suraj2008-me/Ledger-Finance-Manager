@@ -38,6 +38,8 @@ export default function Dashboard() {
   const [toDelete, setToDelete] = useState(null)
 
   const totalBalance = accounts.reduce((s, a) => s + Number(a.balance), 0)
+  const bankBalance = accounts.filter((a) => a.type === 'bank').reduce((s, a) => s + Number(a.balance), 0)
+  const cashBalance = accounts.filter((a) => a.type === 'cash').reduce((s, a) => s + Number(a.balance), 0)
   const income = monthTx.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
   const expense = monthTx
     .filter((t) => t.type === 'expense')
@@ -86,6 +88,12 @@ export default function Dashboard() {
         <Spinner />
       ) : (
         <div className="space-y-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <MiniStat label="Bank balance" value={formatMoney(bankBalance, currency)} />
+            <MiniStat label="Cash in hand" value={formatMoney(cashBalance, currency)} />
+            <MiniStat label="Accounts" value={String(accounts.length)} />
+          </div>
+
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 rounded-md border border-hairline dark:border-hairline-dark p-6">
               <StatHero label="Total balance" amount={totalBalance} currency={currency} />

@@ -52,9 +52,14 @@ export function useTransactions(filters = {}) {
   }
 
   const updateTransaction = async (id, patch) => {
+    // Transaction reads include joined `categories` / `accounts` objects.
+    // Never send those relation objects back to PostgREST as transaction
+    // columns; only the actual transactions-table fields belong in `update`.
+    const { categories: _categories, accounts: _accounts, id: _id, user_id: _userId, created_at: _createdAt, updated_at: _updatedAt, ...transactionPatch } = patch
+
     const { data, error } = await supabase
       .from('transactions')
-      .update(patch)
+      .update(transactionPatch)
       .eq('id', id)
       .select(SELECT)
       .single()

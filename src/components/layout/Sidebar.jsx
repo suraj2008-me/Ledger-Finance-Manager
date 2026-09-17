@@ -8,12 +8,14 @@ import {
   Repeat,
   BarChart3,
   Settings,
+  HandCoins,
 } from 'lucide-react'
 
 const links = [
   { to: '/', label: 'Overview', icon: LayoutGrid, end: true },
   { to: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { to: '/accounts', label: 'Accounts', icon: Wallet },
+  { to: '/loans', label: 'Loans & Credits', icon: HandCoins },
   { to: '/categories', label: 'Categories', icon: Tags },
   { to: '/budgets', label: 'Budgets', icon: PiggyBank },
   { to: '/recurring', label: 'Recurring', icon: Repeat },
