@@ -7,6 +7,10 @@ import {
 } from "react";
 import { supabase } from "../lib/supabaseClient";
 
+const APP_URL = (
+  import.meta.env.VITE_APP_URL || window.location.origin
+).replace(/\/$/, "");
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -58,7 +62,10 @@ export function AuthProvider({ children }) {
     supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${APP_URL}/login`,
+      },
     });
 
   const signIn = (email, password) =>
