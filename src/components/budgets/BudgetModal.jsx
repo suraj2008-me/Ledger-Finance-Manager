@@ -1,34 +1,47 @@
-import { useEffect, useState } from 'react'
-import Modal from '../ui/Modal'
-import Input from '../ui/Input'
-import Select from '../ui/Select'
-import Button from '../ui/Button'
+import { useEffect, useState } from "react";
+import Modal from "../ui/Modal";
+import Input from "../ui/Input";
+import Select from "../ui/Select";
+import Button from "../ui/Button";
 
-const empty = { category_id: '', monthly_limit: '' }
+const empty = { category_id: "", monthly_limit: "" };
 
-export default function BudgetModal({ open, onClose, onSave, categories, initial }) {
-  const [form, setForm] = useState(empty)
+export default function BudgetModal({
+  open,
+  onClose,
+  onSave,
+  categories,
+  initial,
+}) {
+  const [form, setForm] = useState(empty);
 
   useEffect(() => {
     if (open)
       setForm(
         initial
-          ? { category_id: initial.category_id, monthly_limit: initial.monthly_limit }
-          : empty
-      )
-  }, [open, initial])
+          ? {
+              category_id: initial.category_id,
+              monthly_limit: initial.monthly_limit,
+            }
+          : empty,
+      );
+  }, [open, initial]);
 
   const onSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const { error } = await onSave({
       ...form,
       monthly_limit: Number(form.monthly_limit),
-    })
-    if (!error) onClose()
-  }
+    });
+    if (!error) onClose();
+  };
 
   return (
-    <Modal open={open} onClose={onClose} title={initial ? 'Edit budget' : 'New budget'}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={initial ? "Edit budget" : "New budget"}
+    >
       <form onSubmit={onSubmit} className="space-y-4">
         <Select
           label="Category"
@@ -62,5 +75,5 @@ export default function BudgetModal({ open, onClose, onSave, categories, initial
         </div>
       </form>
     </Modal>
-  )
+  );
 }

@@ -1,35 +1,46 @@
-import { useState } from 'react'
-import { PiggyBank, Plus } from 'lucide-react'
-import AppShell from '../components/layout/AppShell'
-import BudgetRow from '../components/budgets/BudgetRow'
-import BudgetModal from '../components/budgets/BudgetModal'
-import ConfirmDialog from '../components/ui/ConfirmDialog'
-import EmptyState from '../components/ui/EmptyState'
-import Spinner from '../components/ui/Spinner'
-import Button from '../components/ui/Button'
-import { useBudgets } from '../hooks/useBudgets'
-import { useCategories } from '../hooks/useCategories'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react";
+import { PiggyBank, Plus } from "lucide-react";
+import AppShell from "../components/layout/AppShell";
+import BudgetRow from "../components/budgets/BudgetRow";
+import BudgetModal from "../components/budgets/BudgetModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import EmptyState from "../components/ui/EmptyState";
+import Spinner from "../components/ui/Spinner";
+import Button from "../components/ui/Button";
+import { useBudgets } from "../hooks/useBudgets";
+import { useCategories } from "../hooks/useCategories";
+import { useAuth } from "../context/AuthContext";
 
 export default function Budgets() {
-  const { budgets, spendByCategory, loading, addBudget, updateBudget, deleteBudget } =
-    useBudgets()
-  const { categories } = useCategories()
-  const { profile } = useAuth()
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState(null)
-  const [toDelete, setToDelete] = useState(null)
+  const {
+    budgets,
+    spendByCategory,
+    loading,
+    addBudget,
+    updateBudget,
+    deleteBudget,
+  } = useBudgets();
+  const { categories } = useCategories();
+  const { profile } = useAuth();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [toDelete, setToDelete] = useState(null);
 
-  const budgetedIds = new Set(budgets.map((b) => b.category_id))
-  const available = categories.filter((c) => c.type === 'expense' && !budgetedIds.has(c.id))
+  const budgetedIds = new Set(budgets.map((b) => b.category_id));
+  const available = categories.filter(
+    (c) => c.type === "expense" && !budgetedIds.has(c.id),
+  );
 
   const openNew = () => {
-    setEditing(null)
-    setModalOpen(true)
-  }
+    setEditing(null);
+    setModalOpen(true);
+  };
 
-  const totalBudget = budgets.reduce((s, b) => s + Number(b.monthly_limit), 0)
-  const totalSpent = budgets.reduce((s, b) => s + (spendByCategory[b.category_id] ?? 0), 0)
+  const totalBudget = budgets.reduce((s, b) => s + Number(b.monthly_limit), 0);
+  const totalSpent = budgets.reduce(
+    (s, b) => s + (spendByCategory[b.category_id] ?? 0),
+    0,
+  );
 
   return (
     <AppShell title="Budgets" onQuickAdd={openNew}>
@@ -39,7 +50,7 @@ export default function Budgets() {
             <div>
               <p className="text-sm text-ink-400">This month, budgeted</p>
               <p className="font-display text-3xl text-ink-900 dark:text-paper">
-                {(totalSpent / (totalBudget || 1) * 100).toFixed(0)}% used
+                {((totalSpent / (totalBudget || 1)) * 100).toFixed(0)}% used
               </p>
             </div>
             <Button size="sm" onClick={openNew}>
@@ -66,8 +77,8 @@ export default function Budgets() {
                 spent={spendByCategory[b.category_id] ?? 0}
                 currency={profile?.base_currency}
                 onEdit={(bud) => {
-                  setEditing(bud)
-                  setModalOpen(true)
+                  setEditing(bud);
+                  setModalOpen(true);
                 }}
                 onDelete={setToDelete}
               />
@@ -79,7 +90,9 @@ export default function Budgets() {
       <BudgetModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={(payload) => (editing ? updateBudget(editing.id, payload) : addBudget(payload))}
+        onSave={(payload) =>
+          editing ? updateBudget(editing.id, payload) : addBudget(payload)
+        }
         categories={editing ? categories : available}
         initial={editing}
       />
@@ -91,5 +104,5 @@ export default function Budgets() {
         description="This category will no longer have a monthly limit."
       />
     </AppShell>
-  )
+  );
 }

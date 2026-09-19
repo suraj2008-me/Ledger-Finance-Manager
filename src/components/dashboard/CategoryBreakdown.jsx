@@ -1,11 +1,15 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { formatMoney } from '../../lib/formatters'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { formatMoney } from "../../lib/formatters";
 
 export default function CategoryBreakdown({ data, currency }) {
-  const total = data.reduce((s, d) => s + d.value, 0)
+  const total = data.reduce((s, d) => s + d.value, 0);
 
   if (data.length === 0) {
-    return <p className="py-8 text-center text-sm text-ink-400">No expenses recorded yet.</p>
+    return (
+      <p className="py-8 text-center text-sm text-ink-400">
+        No expenses recorded yet.
+      </p>
+    );
   }
 
   return (
@@ -32,9 +36,15 @@ export default function CategoryBreakdown({ data, currency }) {
       </div>
       <div className="w-full flex-1 space-y-2">
         {data.slice(0, 6).map((d) => (
-          <div key={d.name} className="flex items-center justify-between text-sm">
+          <div
+            key={d.name}
+            className="flex items-center justify-between text-sm"
+          >
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: d.color }} />
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: d.color }}
+              />
               <span className="text-ink-700 dark:text-ink-200">{d.name}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -49,5 +59,5 @@ export default function CategoryBreakdown({ data, currency }) {
         ))}
       </div>
     </div>
-  )
+  );
 }

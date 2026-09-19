@@ -1,47 +1,52 @@
-import { useState } from 'react'
-import { Download, ArrowLeftRight } from 'lucide-react'
-import AppShell from '../components/layout/AppShell'
-import TransactionFilters from '../components/transactions/TransactionFilters'
-import TransactionRow from '../components/transactions/TransactionRow'
-import TransactionModal from '../components/transactions/TransactionModal'
-import ConfirmDialog from '../components/ui/ConfirmDialog'
-import EmptyState from '../components/ui/EmptyState'
-import Spinner from '../components/ui/Spinner'
-import Button from '../components/ui/Button'
-import { useTransactions } from '../hooks/useTransactions'
-import { useCategories } from '../hooks/useCategories'
-import { useAccounts } from '../hooks/useAccounts'
-import { transactionsToCSV, downloadCSV } from '../lib/csv'
+import { useState } from "react";
+import { Download, ArrowLeftRight } from "lucide-react";
+import AppShell from "../components/layout/AppShell";
+import TransactionFilters from "../components/transactions/TransactionFilters";
+import TransactionRow from "../components/transactions/TransactionRow";
+import TransactionModal from "../components/transactions/TransactionModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import EmptyState from "../components/ui/EmptyState";
+import Spinner from "../components/ui/Spinner";
+import Button from "../components/ui/Button";
+import { useTransactions } from "../hooks/useTransactions";
+import { useCategories } from "../hooks/useCategories";
+import { useAccounts } from "../hooks/useAccounts";
+import { transactionsToCSV, downloadCSV } from "../lib/csv";
 
 export default function Transactions() {
-  const [filters, setFilters] = useState({})
-  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } =
-    useTransactions(filters)
-  const { categories } = useCategories()
-  const { accounts } = useAccounts()
+  const [filters, setFilters] = useState({});
+  const {
+    transactions,
+    loading,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+  } = useTransactions(filters);
+  const { categories } = useCategories();
+  const { accounts } = useAccounts();
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState(null)
-  const [toDelete, setToDelete] = useState(null)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [toDelete, setToDelete] = useState(null);
 
   const openNew = () => {
-    setEditing(null)
-    setModalOpen(true)
-  }
+    setEditing(null);
+    setModalOpen(true);
+  };
   const openEdit = (tx) => {
-    setEditing(tx)
-    setModalOpen(true)
-  }
+    setEditing(tx);
+    setModalOpen(true);
+  };
 
   const handleSave = (payload) =>
-    editing ? updateTransaction(editing.id, payload) : addTransaction(payload)
+    editing ? updateTransaction(editing.id, payload) : addTransaction(payload);
 
   const grouped = transactions.reduce((acc, tx) => {
-    const key = tx.date
-    acc[key] = acc[key] || []
-    acc[key].push(tx)
-    return acc
-  }, {})
+    const key = tx.date;
+    acc[key] = acc[key] || [];
+    acc[key].push(tx);
+    return acc;
+  }, {});
 
   return (
     <AppShell title="Transactions" onQuickAdd={openNew}>
@@ -56,7 +61,12 @@ export default function Transactions() {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => downloadCSV('ledgerly-transactions.csv', transactionsToCSV(transactions))}
+            onClick={() =>
+              downloadCSV(
+                "ledgerly-transactions.csv",
+                transactionsToCSV(transactions),
+              )
+            }
           >
             <Download size={14} /> Export CSV
           </Button>
@@ -76,10 +86,10 @@ export default function Transactions() {
             {Object.entries(grouped).map(([date, rows]) => (
               <div key={date} className="hairline-y">
                 <p className="pt-4 text-xs uppercase tracking-wide text-ink-300">
-                  {new Date(date).toLocaleDateString('en-IN', {
-                    weekday: 'long',
-                    day: '2-digit',
-                    month: 'long',
+                  {new Date(date).toLocaleDateString("en-IN", {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "long",
                   })}
                 </p>
                 <div className="hairline-y">
@@ -114,5 +124,5 @@ export default function Transactions() {
         description="This entry will be permanently removed from your ledger."
       />
     </AppShell>
-  )
+  );
 }

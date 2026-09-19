@@ -6,11 +6,15 @@ export default function EmptyState({ icon: Icon, title, description, action }) {
           <Icon size={20} />
         </div>
       )}
-      <p className="font-display text-base text-ink-900 dark:text-paper">{title}</p>
+      <p className="font-display text-base text-ink-900 dark:text-paper">
+        {title}
+      </p>
       {description && (
-        <p className="max-w-xs text-sm text-ink-400 dark:text-ink-300">{description}</p>
+        <p className="max-w-xs text-sm text-ink-400 dark:text-ink-300">
+          {description}
+        </p>
       )}
       {action}
     </div>
-  )
+  );
 }

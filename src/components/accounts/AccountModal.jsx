@@ -1,28 +1,35 @@
-import { useEffect, useState } from 'react'
-import Modal from '../ui/Modal'
-import Input from '../ui/Input'
-import Select from '../ui/Select'
-import Button from '../ui/Button'
-import { ACCOUNT_TYPES, CURRENCIES } from '../../lib/constants'
+import { useEffect, useState } from "react";
+import Modal from "../ui/Modal";
+import Input from "../ui/Input";
+import Select from "../ui/Select";
+import Button from "../ui/Button";
+import { ACCOUNT_TYPES, CURRENCIES } from "../../lib/constants";
 
-const empty = { name: '', type: 'bank', opening_balance: '', currency: 'INR' }
+const empty = { name: "", type: "bank", opening_balance: "", currency: "INR" };
 
 export default function AccountModal({ open, onClose, onSave, initial }) {
-  const [form, setForm] = useState(empty)
+  const [form, setForm] = useState(empty);
 
   useEffect(() => {
-    if (open) setForm(initial ? { ...empty, ...initial } : empty)
-  }, [open, initial])
+    if (open) setForm(initial ? { ...empty, ...initial } : empty);
+  }, [open, initial]);
 
   const onSubmit = async (e) => {
-    e.preventDefault()
-    const payload = { ...form, opening_balance: Number(form.opening_balance || 0) }
-    const { error } = await onSave(payload)
-    if (!error) onClose()
-  }
+    e.preventDefault();
+    const payload = {
+      ...form,
+      opening_balance: Number(form.opening_balance || 0),
+    };
+    const { error } = await onSave(payload);
+    if (!error) onClose();
+  };
 
   return (
-    <Modal open={open} onClose={onClose} title={initial ? 'Edit account' : 'New account'}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={initial ? "Edit account" : "New account"}
+    >
       <form onSubmit={onSubmit} className="space-y-4">
         <Input
           label="Account name"
@@ -49,7 +56,9 @@ export default function AccountModal({ open, onClose, onSave, initial }) {
               type="number"
               step="0.01"
               value={form.opening_balance}
-              onChange={(e) => setForm({ ...form, opening_balance: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, opening_balance: e.target.value })
+              }
               placeholder="0.00"
             />
           )}
@@ -78,5 +87,5 @@ export default function AccountModal({ open, onClose, onSave, initial }) {
         </div>
       </form>
     </Modal>
-  )
+  );
 }

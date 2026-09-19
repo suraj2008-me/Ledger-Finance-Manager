@@ -1,12 +1,14 @@
-import { Pencil, Trash2 } from 'lucide-react'
-import IconBadge from '../ui/IconBadge'
+import { Pencil, Trash2 } from "lucide-react";
+import IconBadge from "../ui/IconBadge";
 
 export default function CategoryRow({ category, onEdit, onDelete }) {
   return (
     <div className="group flex items-center justify-between py-3">
       <div className="flex items-center gap-3">
         <IconBadge color={category.color} label={category.name} />
-        <span className="text-sm text-ink-900 dark:text-paper">{category.name}</span>
+        <span className="text-sm text-ink-900 dark:text-paper">
+          {category.name}
+        </span>
       </div>
       <div className="flex items-center gap-3">
         <span className="text-xs capitalize text-ink-400">{category.type}</span>
@@ -26,5 +28,5 @@ export default function CategoryRow({ category, onEdit, onDelete }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

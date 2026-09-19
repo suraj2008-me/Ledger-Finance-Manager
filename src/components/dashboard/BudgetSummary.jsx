@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { formatMoney } from '../../lib/formatters'
+import { Link } from "react-router-dom";
+import { formatMoney } from "../../lib/formatters";
 
 export default function BudgetSummary({ budgets, spendByCategory, currency }) {
   if (budgets.length === 0) {
@@ -10,32 +10,38 @@ export default function BudgetSummary({ budgets, spendByCategory, currency }) {
           Set your first budget
         </Link>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-3">
       {budgets.slice(0, 4).map((b) => {
-        const spent = spendByCategory[b.category_id] ?? 0
-        const pct = b.monthly_limit > 0 ? Math.min(100, (spent / b.monthly_limit) * 100) : 0
-        const over = spent > b.monthly_limit
+        const spent = spendByCategory[b.category_id] ?? 0;
+        const pct =
+          b.monthly_limit > 0
+            ? Math.min(100, (spent / b.monthly_limit) * 100)
+            : 0;
+        const over = spent > b.monthly_limit;
         return (
           <div key={b.id}>
             <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="text-ink-700 dark:text-ink-200">{b.categories?.name}</span>
+              <span className="text-ink-700 dark:text-ink-200">
+                {b.categories?.name}
+              </span>
               <span className="tabular text-ink-400">
-                {formatMoney(spent, currency)} / {formatMoney(b.monthly_limit, currency)}
+                {formatMoney(spent, currency)} /{" "}
+                {formatMoney(b.monthly_limit, currency)}
               </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700">
               <div
-                className={`h-full rounded-full ${over ? 'bg-rust-500' : 'bg-ledger-500'}`}
+                className={`h-full rounded-full ${over ? "bg-rust-500" : "bg-ledger-500"}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

@@ -1,18 +1,18 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
-import ProtectedRoute from './routes/ProtectedRoute'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import Dashboard from './pages/Dashboard'
-import Transactions from './pages/Transactions'
-import Accounts from './pages/Accounts'
-import Loans from './pages/Loans'
-import Categories from './pages/Categories'
-import Budgets from './pages/Budgets'
-import Recurring from './pages/Recurring'
-import Reports from './pages/Reports'
-import Settings from './pages/Settings'
-import NotFound from './pages/NotFound'
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import Transactions from "./pages/Transactions";
+import Accounts from "./pages/Accounts";
+import Loans from "./pages/Loans";
+import Categories from "./pages/Categories";
+import Budgets from "./pages/Budgets";
+import Recurring from "./pages/Recurring";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -21,10 +21,10 @@ export default function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#12181B',
-            color: '#F1F3EE',
-            fontSize: '14px',
-            borderRadius: '6px',
+            background: "#12181B",
+            color: "#F1F3EE",
+            fontSize: "14px",
+            borderRadius: "6px",
           },
         }}
       />
@@ -107,5 +107,5 @@ export default function App() {
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </>
-  )
+  );
 }

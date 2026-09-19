@@ -1,10 +1,19 @@
-import { Pencil, Trash2 } from 'lucide-react'
-import { formatMoney } from '../../lib/formatters'
+import { Pencil, Trash2 } from "lucide-react";
+import { formatMoney } from "../../lib/formatters";
 
-export default function BudgetRow({ budget, spent, currency, onEdit, onDelete }) {
-  const pct = budget.monthly_limit > 0 ? Math.min(100, (spent / budget.monthly_limit) * 100) : 0
-  const over = spent > budget.monthly_limit
-  const near = !over && pct >= 80
+export default function BudgetRow({
+  budget,
+  spent,
+  currency,
+  onEdit,
+  onDelete,
+}) {
+  const pct =
+    budget.monthly_limit > 0
+      ? Math.min(100, (spent / budget.monthly_limit) * 100)
+      : 0;
+  const over = spent > budget.monthly_limit;
+  const near = !over && pct >= 80;
 
   return (
     <div className="group py-4">
@@ -14,11 +23,14 @@ export default function BudgetRow({ budget, spent, currency, onEdit, onDelete })
             className="h-2.5 w-2.5 rounded-full"
             style={{ backgroundColor: budget.categories?.color }}
           />
-          <span className="text-sm text-ink-900 dark:text-paper">{budget.categories?.name}</span>
+          <span className="text-sm text-ink-900 dark:text-paper">
+            {budget.categories?.name}
+          </span>
         </div>
         <div className="flex items-center gap-3">
           <span className="tabular text-sm text-ink-500 dark:text-ink-300">
-            {formatMoney(spent, currency)} / {formatMoney(budget.monthly_limit, currency)}
+            {formatMoney(spent, currency)} /{" "}
+            {formatMoney(budget.monthly_limit, currency)}
           </span>
           <div className="items-center gap-2 flex">
             <button
@@ -39,7 +51,7 @@ export default function BudgetRow({ budget, spent, currency, onEdit, onDelete })
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700">
         <div
           className={`h-full rounded-full transition-all ${
-            over ? 'bg-rust-500' : near ? 'bg-amber' : 'bg-ledger-500'
+            over ? "bg-rust-500" : near ? "bg-amber" : "bg-ledger-500"
           }`}
           style={{ width: `${pct}%` }}
         />
@@ -50,5 +62,5 @@ export default function BudgetRow({ budget, spent, currency, onEdit, onDelete })
         </p>
       )}
     </div>
-  )
+  );
 }

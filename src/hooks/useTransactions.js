@@ -1,86 +1,98 @@
-import { useCallback, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../context/AuthContext'
-import toast from 'react-hot-toast'
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
-const SELECT = '*, categories(id,name,color,type), accounts(id,name,type,currency)'
+const SELECT =
+  "*, categories(id,name,color,type), accounts(id,name,type,currency)";
 
 export function useTransactions(filters = {}) {
-  const { user } = useAuth()
-  const [transactions, setTransactions] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const key = JSON.stringify(filters)
+  const key = JSON.stringify(filters);
 
   const fetchTransactions = useCallback(async () => {
-    if (!user) return
-    setLoading(true)
-    let query = supabase.from('transactions').select(SELECT).order('date', { ascending: false })
+    if (!user) return;
+    setLoading(true);
+    let query = supabase
+      .from("transactions")
+      .select(SELECT)
+      .order("date", { ascending: false });
 
-    if (filters.from) query = query.gte('date', filters.from)
-    if (filters.to) query = query.lte('date', filters.to)
-    if (filters.type) query = query.eq('type', filters.type)
-    if (filters.accountId) query = query.eq('account_id', filters.accountId)
-    if (filters.categoryId) query = query.eq('category_id', filters.categoryId)
-    if (filters.search) query = query.ilike('note', `%${filters.search}%`)
-    if (filters.limit) query = query.limit(filters.limit)
+    if (filters.from) query = query.gte("date", filters.from);
+    if (filters.to) query = query.lte("date", filters.to);
+    if (filters.type) query = query.eq("type", filters.type);
+    if (filters.accountId) query = query.eq("account_id", filters.accountId);
+    if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
+    if (filters.search) query = query.ilike("note", `%${filters.search}%`);
+    if (filters.limit) query = query.limit(filters.limit);
 
-    const { data, error } = await query
-    if (error) toast.error(error.message)
-    setTransactions(data ?? [])
-    setLoading(false)
+    const { data, error } = await query;
+    if (error) toast.error(error.message);
+    setTransactions(data ?? []);
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, key])
+  }, [user, key]);
 
   useEffect(() => {
-    fetchTransactions()
-  }, [fetchTransactions])
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   const addTransaction = async (payload) => {
     const { data, error } = await supabase
-      .from('transactions')
+      .from("transactions")
       .insert({ ...payload, user_id: user.id })
       .select(SELECT)
-      .single()
+      .single();
     if (error) {
-      toast.error(error.message)
-      return { error }
+      toast.error(error.message);
+      return { error };
     }
-    setTransactions((prev) => [data, ...prev])
-    toast.success('Transaction saved')
-    return { data }
-  }
+    setTransactions((prev) => [data, ...prev]);
+    toast.success("Transaction saved");
+    return { data };
+  };
 
   const updateTransaction = async (id, patch) => {
     // Transaction reads include joined `categories` / `accounts` objects.
     // Never send those relation objects back to PostgREST as transaction
     // columns; only the actual transactions-table fields belong in `update`.
-    const { categories: _categories, accounts: _accounts, id: _id, user_id: _userId, created_at: _createdAt, updated_at: _updatedAt, ...transactionPatch } = patch
+    const {
+      categories: _categories,
+      accounts: _accounts,
+      id: _id,
+      user_id: _userId,
+      created_at: _createdAt,
+      updated_at: _updatedAt,
+      ...transactionPatch
+    } = patch;
 
     const { data, error } = await supabase
-      .from('transactions')
+      .from("transactions")
       .update(transactionPatch)
-      .eq('id', id)
+      .eq("id", id)
       .select(SELECT)
-      .single()
+      .single();
     if (error) {
-      toast.error(error.message)
-      return { error }
+      toast.error(error.message);
+      return { error };
     }
-    setTransactions((prev) => prev.map((t) => (t.id === id ? data : t)))
-    toast.success('Transaction updated')
-    return { data }
-  }
+    setTransactions((prev) => prev.map((t) => (t.id === id ? data : t)));
+    toast.success("Transaction updated");
+    return { data };
+  };
 
   const deleteTransaction = async (id) => {
-    const { error } = await supabase.from('transactions').delete().eq('id', id)
+    const { error } = await supabase.from("transactions").delete().eq("id", id);
     if (error) {
-      toast.error(error.message)
-      return { error }
+      toast.error(error.message);
+      return { error };
     }
-    setTransactions((prev) => prev.filter((t) => t.id !== id))
-    toast.success('Transaction deleted')
-  }
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+    toast.success("Transaction deleted");
+  };
 
   return {
     transactions,
@@ -89,5 +101,5 @@ export function useTransactions(filters = {}) {
     updateTransaction,
     deleteTransaction,
     refresh: fetchTransactions,
-  }
+  };
 }
