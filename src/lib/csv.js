@@ -42,3 +42,59 @@ export function parseCSV(text) {
     return row;
   });
 }
+
+const VALID_TYPES = ["income", "expense", "transfer"];
+
+/**
+ * Maps raw parseCSV() rows (date, type, amount, category, account, note)
+ * onto the user's existing accounts/categories, and validates each row so
+ * the Import Transactions modal can preview what will and won't import.
+ */
+export function buildImportRows(rawRows, { accounts = [], categories = [] }) {
+  return rawRows.map((row, index) => {
+    const type = (row.type || "").trim().toLowerCase();
+    const amount = Number(row.amount);
+    const accountName = (row.account || "").trim();
+    const categoryName = (row.category || "").trim();
+
+    const account = accounts.find(
+      (a) => a.name.toLowerCase() === accountName.toLowerCase(),
+    );
+    const category = categories.find(
+      (c) => c.name.toLowerCase() === categoryName.toLowerCase(),
+    );
+
+    const errors = [];
+    if (!row.date || Number.isNaN(new Date(row.date).getTime())) {
+      errors.push("Invalid date");
+    }
+    if (!VALID_TYPES.includes(type)) {
+      errors.push("Invalid type");
+    }
+    if (!amount || amount <= 0) {
+      errors.push("Invalid amount");
+    }
+    if (!accountName) {
+      errors.push("Missing account");
+    } else if (!account) {
+      errors.push(`Unknown account "${accountName}"`);
+    }
+    if (categoryName && !category) {
+      errors.push(`Unknown category "${categoryName}"`);
+    }
+
+    return {
+      rowNumber: index + 1,
+      date: row.date,
+      type,
+      amount,
+      note: row.note || "",
+      accountId: account?.id ?? null,
+      accountName,
+      categoryId: category?.id ?? null,
+      categoryName,
+      valid: errors.length === 0,
+      errors,
+    };
+  });
+}

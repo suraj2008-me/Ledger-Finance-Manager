@@ -3,8 +3,13 @@ import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
+// Two foreign keys now point from transactions -> accounts (account_id and
+// to_account_id), so each embed must be disambiguated with its constraint
+// name, and the destination side is aliased to `to_account`.
 const SELECT =
-  "*, categories(id,name,color,type), accounts(id,name,type,currency)";
+  "*, categories(id,name,color,type), " +
+  "accounts:accounts!transactions_account_id_fkey(id,name,type,currency), " +
+  "to_account:accounts!transactions_to_account_id_fkey(id,name,type,currency)";
 
 export function useTransactions(filters = {}) {
   const { user } = useAuth();
@@ -56,16 +61,17 @@ export function useTransactions(filters = {}) {
   };
 
   const updateTransaction = async (id, patch) => {
-    // Transaction reads include joined `categories` / `accounts` objects.
-    // Never send those relation objects back to PostgREST as transaction
-    // columns; only the actual transactions-table fields belong in `update`.
+    // Transaction reads include joined `categories` / `accounts` /
+    // `to_account` objects. Never send those relation objects back to
+    // PostgREST as transaction columns; only the actual transactions-table
+    // fields belong in `update`.
     const {
       categories: _categories,
       accounts: _accounts,
+      to_account: _toAccount,
       id: _id,
       user_id: _userId,
       created_at: _createdAt,
-      updated_at: _updatedAt,
       ...transactionPatch
     } = patch;
 

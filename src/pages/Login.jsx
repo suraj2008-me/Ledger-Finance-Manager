@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AuthLayout from "../components/auth/AuthLayout";
 import Input from "../components/ui/Input";
+import PasswordInput from "../components/ui/PasswordInput";
 import Button from "../components/ui/Button";
 import { useAuth } from "../context/AuthContext";
 
@@ -45,14 +46,24 @@ export default function Login() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           placeholder="you@example.com"
         />
-        <Input
-          label="Password"
-          type="password"
-          required
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          placeholder="••••••••"
-        />
+        <div>
+          <PasswordInput
+            label="Password"
+            required
+            autoComplete="current-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            placeholder="••••••••"
+          />
+          <div className="mt-2 flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-xs font-medium text-ledger-600 hover:underline dark:text-ledger-300"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Signing in…" : "Log in"}
         </Button>

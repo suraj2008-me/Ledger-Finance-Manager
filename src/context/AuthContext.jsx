@@ -86,6 +86,17 @@ export function AuthProvider({ children }) {
     return { data, error };
   };
 
+  // Sends a password-recovery email with a link back to /reset-password.
+  const resetPasswordForEmail = (email) =>
+    supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${APP_URL}/reset-password`,
+    });
+
+  // Used both by the /reset-password recovery link flow and by the
+  // "change password" form in Settings (after re-verifying the current one).
+  const updatePassword = (password) =>
+    supabase.auth.updateUser({ password });
+
   const value = {
     session,
     user: session?.user ?? null,
@@ -96,6 +107,8 @@ export function AuthProvider({ children }) {
     signOut,
     refreshProfile,
     updateProfile,
+    resetPasswordForEmail,
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -129,10 +129,9 @@ create trigger trg_seed_account_balance
 
 -- ---------------------------------------------------------------------------
 -- Keep account balances in sync with transactions automatically.
--- Income adds to the account, expense subtracts. Transfers are recorded for
--- history/reporting but don't move money between accounts in this version —
--- log a transfer as an expense on the source account and an income on the
--- destination account if you want both balances to reflect it.
+-- Income adds to the account, expense subtracts. A transfer moves the
+-- amount out of account_id and into to_account_id in the same trigger, so
+-- both balances update together (see the "real transfers" section below).
 -- ---------------------------------------------------------------------------
 create or replace function public.apply_transaction_delta(
   p_account_id uuid, p_type text, p_amount numeric, p_sign int
@@ -315,4 +314,100 @@ create index if not exists loans_repayment_account_id_idx
 on public.loans(repayment_account_id);
 
 -- 6. Refresh Supabase/PostgREST schema cache
+notify pgrst, 'reload schema';
+-- ============================================================
+-- REAL TRANSFERS BETWEEN ACCOUNTS
+-- Adds a destination account to transfer transactions and updates the
+-- balance trigger to move money out of one account and into the other,
+-- instead of only ever touching a single account_id.
+-- ============================================================
+
+alter table public.transactions
+add column if not exists to_account_id uuid;
+
+alter table public.transactions
+drop constraint if exists transactions_to_account_id_fkey;
+
+alter table public.transactions
+add constraint transactions_to_account_id_fkey
+foreign key (to_account_id)
+references public.accounts (id)
+on delete set null;
+
+create index if not exists transactions_to_account_id_idx
+on public.transactions (to_account_id);
+
+-- A transfer must have a destination account, and it can't be the same as
+-- the source account. Income/expense rows are untouched by this rule.
+alter table public.transactions
+drop constraint if exists transactions_transfer_accounts_check;
+
+alter table public.transactions
+add constraint transactions_transfer_accounts_check
+check (
+  type <> 'transfer'
+  or (to_account_id is not null and to_account_id <> account_id)
+);
+
+-- The old 4-argument version only ever touched one account. Drop it before
+-- recreating with a new signature (create or replace can't change args).
+drop function if exists public.apply_transaction_delta(uuid, text, numeric, int);
+
+create or replace function public.apply_transaction_delta(
+  p_account_id uuid,
+  p_to_account_id uuid,
+  p_type text,
+  p_amount numeric,
+  p_sign int
+) returns void as $$
+begin
+  if p_type = 'income' then
+    if p_account_id is not null then
+      update public.accounts set balance = balance + (p_sign * p_amount) where id = p_account_id;
+    end if;
+  elsif p_type = 'expense' then
+    if p_account_id is not null then
+      update public.accounts set balance = balance - (p_sign * p_amount) where id = p_account_id;
+    end if;
+  elsif p_type = 'transfer' then
+    -- Money leaves the source account and lands in the destination account.
+    if p_account_id is not null then
+      update public.accounts set balance = balance - (p_sign * p_amount) where id = p_account_id;
+    end if;
+    if p_to_account_id is not null then
+      update public.accounts set balance = balance + (p_sign * p_amount) where id = p_to_account_id;
+    end if;
+  end if;
+end;
+$$ language plpgsql security definer;
+
+create or replace function public.transactions_balance_trigger()
+returns trigger as $$
+begin
+  if tg_op = 'INSERT' then
+    perform public.apply_transaction_delta(new.account_id, new.to_account_id, new.type, new.amount, 1);
+    return new;
+  elsif tg_op = 'UPDATE' then
+    -- Reverse the old transaction (covers edits that change the type,
+    -- amount, source account or destination account) then apply the new one.
+    perform public.apply_transaction_delta(old.account_id, old.to_account_id, old.type, old.amount, -1);
+    perform public.apply_transaction_delta(new.account_id, new.to_account_id, new.type, new.amount, 1);
+    return new;
+  elsif tg_op = 'DELETE' then
+    perform public.apply_transaction_delta(old.account_id, old.to_account_id, old.type, old.amount, -1);
+    return old;
+  end if;
+  return null;
+end;
+$$ language plpgsql;
+
+-- Trigger definition itself is unchanged (same function name/signature),
+-- but re-create it defensively in case this file is ever run out of order.
+drop trigger if exists trg_transactions_balance on public.transactions;
+create trigger trg_transactions_balance
+  after insert or update or delete on public.transactions
+  for each row execute function public.transactions_balance_trigger();
+
+-- Refresh Supabase/PostgREST schema cache so the new to_account_id relation
+-- (and its foreign key) is picked up immediately.
 notify pgrst, 'reload schema';

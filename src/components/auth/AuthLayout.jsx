@@ -1,7 +1,5 @@
 import {
-  ArrowUpRight,
-  Check,
-  CircleDollarSign,
+  Wallet,
   LockKeyhole,
   WalletCards,
 } from "lucide-react";
@@ -31,14 +29,14 @@ export default function AuthLayout({
       <div className="mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 sm:px-6 lg:px-10">
         <header className="flex shrink-0 items-center justify-between py-4 sm:py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-ledger-500 text-white shadow-sm shadow-ledger-500/20 sm:h-10 sm:w-10">
-              <CircleDollarSign size={19} strokeWidth={2} />
-            </div>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-ledger-500 to-ledger-600 text-white">
+              <Wallet size={18} strokeWidth={2.4} />
+            </span>
             <div>
-              <div className="font-display text-lg font-semibold leading-none">
+              <div className="font-display text-lg font-semibold tracking-tight">
                 Ledger
               </div>
-              <div className="mt-1 text-[9px] font-semibold uppercase tracking-[.18em] text-ink-400 dark:text-ink-300">
+              <div className="text-[10px] font-semibold uppercase leading-none tracking-[.18em] text-ink-400">
                 Finance Manager
               </div>
             </div>
@@ -56,7 +54,7 @@ export default function AuthLayout({
                 <span className="h-1.5 w-1.5 rounded-full bg-ledger-500" />
                 {isSignup ? "A simpler start" : "Welcome back"}
               </div>
-              <h2 className="max-w-xl font-display text-5xl leading-[.98] tracking-[-.035em] xl:text-6xl">
+              <h2 className="max-w-xl font-display text-5xl font-medium leading-[.98] tracking-[-.035em] xl:text-6xl">
                 {isSignup ? (
                   <>
                     Make money{" "}
@@ -80,7 +78,7 @@ export default function AuthLayout({
                     <div className="text-xs text-ink-400 dark:text-ink-300">
                       Available balance
                     </div>
-                    <div className="mt-1 font-display text-4xl tracking-tight">
+                    <div className="mt-1 font-display font-medium text-4xl tracking-tight">
                       ₹84,240
                     </div>
                   </div>

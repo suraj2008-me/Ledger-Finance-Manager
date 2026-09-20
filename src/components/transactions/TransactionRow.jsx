@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Repeat } from "lucide-react";
+import { Pencil, Trash2, Repeat, ArrowRight } from "lucide-react";
 import IconBadge from "../ui/IconBadge";
 import { formatDate, formatMoney } from "../../lib/formatters";
 
@@ -24,7 +24,16 @@ export default function TransactionRow({ tx, onEdit, onDelete }) {
             (isTransfer ? "Transfer" : "Uncategorised")}
         </p>
         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-400">
-          {formatDate(tx.date)} · {tx.accounts?.name}
+          {formatDate(tx.date)} ·{" "}
+          {isTransfer && tx.to_account ? (
+            <span className="inline-flex items-center gap-1">
+              {tx.accounts?.name}
+              <ArrowRight size={10} />
+              {tx.to_account.name}
+            </span>
+          ) : (
+            tx.accounts?.name
+          )}
           {tx.recurrence && tx.recurrence !== "none" && <Repeat size={11} />}
         </p>
       </div>

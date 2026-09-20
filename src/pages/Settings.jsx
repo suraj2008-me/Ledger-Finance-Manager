@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import AppShell from "../components/layout/AppShell";
 import Input from "../components/ui/Input";
+import PasswordInput from "../components/ui/PasswordInput";
 import Select from "../components/ui/Select";
 import Button from "../components/ui/Button";
 import { useAuth } from "../context/AuthContext";
@@ -11,7 +12,8 @@ import { CURRENCIES } from "../lib/constants";
 import { transactionsToCSV, downloadCSV } from "../lib/csv";
 
 export default function Settings() {
-  const { profile, updateProfile, user, signOut } = useAuth();
+  const { profile, updateProfile, user, signIn, updatePassword, signOut } =
+    useAuth();
   const { theme, setTheme } = useTheme();
   const { transactions } = useTransactions({});
   const [form, setForm] = useState({
@@ -20,12 +22,44 @@ export default function Settings() {
   });
   const [saving, setSaving] = useState(false);
 
+  const [pwForm, setPwForm] = useState({
+    current: "",
+    next: "",
+    confirm: "",
+  });
+  const [pwSaving, setPwSaving] = useState(false);
+
   const onSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     const { error } = await updateProfile(form);
     setSaving(false);
     if (!error) toast.success("Settings saved");
+  };
+
+  const onChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwForm.next.length < 6) {
+      return toast.error("New password must be at least 6 characters.");
+    }
+    if (pwForm.next !== pwForm.confirm) {
+      return toast.error("New passwords do not match.");
+    }
+
+    setPwSaving(true);
+    // Re-verify identity with the current password before allowing the
+    // change, so an unattended session can't be used to lock the owner out.
+    const { error: verifyError } = await signIn(user.email, pwForm.current);
+    if (verifyError) {
+      setPwSaving(false);
+      return toast.error("Current password is incorrect.");
+    }
+
+    const { error } = await updatePassword(pwForm.next);
+    setPwSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Password updated");
+    setPwForm({ current: "", next: "", confirm: "" });
   };
 
   return (
@@ -60,6 +94,59 @@ export default function Settings() {
             </Select>
             <Button type="submit" disabled={saving}>
               {saving ? "Saving…" : "Save changes"}
+            </Button>
+          </form>
+        </section>
+
+        <section>
+          <h2 className="mb-4 font-display text-lg text-ink-900 dark:text-paper">
+            Security
+          </h2>
+          <form
+            onSubmit={onChangePassword}
+            className="space-y-4 rounded-md border border-hairline dark:border-hairline-dark p-6"
+          >
+            <p className="text-xs text-ink-400">
+              Change your password. You'll need to confirm your current one
+              first.
+            </p>
+            <PasswordInput
+              label="Current password"
+              required
+              autoComplete="current-password"
+              value={pwForm.current}
+              onChange={(e) =>
+                setPwForm({ ...pwForm, current: e.target.value })
+              }
+              placeholder="••••••••"
+            />
+            <PasswordInput
+              label="New password"
+              required
+              minLength={6}
+              showStrength
+              autoComplete="new-password"
+              value={pwForm.next}
+              onChange={(e) => setPwForm({ ...pwForm, next: e.target.value })}
+              placeholder="At least 6 characters"
+            />
+            <PasswordInput
+              label="Confirm new password"
+              required
+              autoComplete="new-password"
+              value={pwForm.confirm}
+              onChange={(e) =>
+                setPwForm({ ...pwForm, confirm: e.target.value })
+              }
+              placeholder="Re-enter new password"
+              error={
+                pwForm.confirm && pwForm.confirm !== pwForm.next
+                  ? "Passwords don't match"
+                  : undefined
+              }
+            />
+            <Button type="submit" disabled={pwSaving}>
+              {pwSaving ? "Updating…" : "Update password"}
             </Button>
           </form>
         </section>

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Download, ArrowLeftRight } from "lucide-react";
+import { Download, Upload, ArrowLeftRight } from "lucide-react";
 import AppShell from "../components/layout/AppShell";
 import TransactionFilters from "../components/transactions/TransactionFilters";
 import TransactionRow from "../components/transactions/TransactionRow";
 import TransactionModal from "../components/transactions/TransactionModal";
+import ImportModal from "../components/transactions/ImportModal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import EmptyState from "../components/ui/EmptyState";
 import Spinner from "../components/ui/Spinner";
@@ -26,6 +27,7 @@ export default function Transactions() {
   const { accounts } = useAccounts();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [toDelete, setToDelete] = useState(null);
 
@@ -58,18 +60,27 @@ export default function Transactions() {
             categories={categories}
             accounts={accounts}
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              downloadCSV(
-                "ledgerly-transactions.csv",
-                transactionsToCSV(transactions),
-              )
-            }
-          >
-            <Download size={14} /> Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setImportOpen(true)}
+            >
+              <Upload size={14} /> Import CSV
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                downloadCSV(
+                  "ledgerly-transactions.csv",
+                  transactionsToCSV(transactions),
+                )
+              }
+            >
+              <Download size={14} /> Export CSV
+            </Button>
+          </div>
         </div>
 
         {loading ? (
@@ -115,6 +126,16 @@ export default function Transactions() {
         categories={categories}
         accounts={accounts}
         initial={editing}
+      />
+      <ImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        accounts={accounts}
+        categories={categories}
+        onImport={async (payload) => {
+          const result = await addTransaction(payload);
+          return result;
+        }}
       />
       <ConfirmDialog
         open={!!toDelete}

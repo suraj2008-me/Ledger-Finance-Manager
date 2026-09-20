@@ -12,6 +12,7 @@ const empty = {
   date: todayISO(),
   category_id: "",
   account_id: "",
+  to_account_id: "",
   note: "",
   recurrence: "none",
 };
@@ -27,22 +28,38 @@ export default function TransactionModal({
   const [form, setForm] = useState(empty);
 
   useEffect(() => {
-    if (open) setForm(initial ? { ...empty, ...initial } : empty);
+    if (open) {
+      setForm(
+        initial
+          ? { ...empty, ...initial, to_account_id: initial.to_account_id ?? "" }
+          : empty,
+      );
+    }
   }, [open, initial]);
 
+  const isTransfer = form.type === "transfer";
   const filteredCategories = categories.filter(
-    (c) => c.type === form.type || form.type === "transfer",
+    (c) => c.type === form.type || isTransfer,
   );
+  const destinationOptions = accounts.filter((a) => a.id !== form.account_id);
+  const sameAccountError =
+    isTransfer && form.account_id && form.to_account_id === form.account_id;
+
+  const onTypeChange = (value) =>
+    setForm({ ...form, type: value, category_id: "", to_account_id: "" });
 
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!form.account_id) return;
-    // `initial` comes from Supabase with joined `categories` and `accounts`
-    // objects. Those are read-only relation data and must never be sent back
-    // as columns when updating the transactions row.
+    if (isTransfer && (!form.to_account_id || sameAccountError)) return;
+
+    // `initial` comes from Supabase with joined `categories`, `accounts` and
+    // `to_account` objects. Those are read-only relation data and must never
+    // be sent back as columns when updating the transactions row.
     const {
       categories: _categories,
       accounts: _accounts,
+      to_account: _toAccount,
       id: _id,
       user_id: _userId,
       created_at: _createdAt,
@@ -51,7 +68,8 @@ export default function TransactionModal({
     const payload = {
       ...transactionForm,
       amount: Number(form.amount),
-      category_id: form.category_id || null,
+      category_id: isTransfer ? null : form.category_id || null,
+      to_account_id: isTransfer ? form.to_account_id : null,
     };
     const { error } = await onSave(payload);
     if (!error) onClose();
@@ -69,9 +87,7 @@ export default function TransactionModal({
             <button
               type="button"
               key={t.value}
-              onClick={() =>
-                setForm({ ...form, type: t.value, category_id: "" })
-              }
+              onClick={() => onTypeChange(t.value)}
               className={`rounded border px-2 py-1.5 text-sm transition-colors ${
                 form.type === t.value
                   ? t.value === "income"
@@ -107,10 +123,20 @@ export default function TransactionModal({
             onChange={(e) => setForm({ ...form, date: e.target.value })}
           />
           <Select
-            label="Account"
+            label={isTransfer ? "From account" : "Account"}
             required
             value={form.account_id}
-            onChange={(e) => setForm({ ...form, account_id: e.target.value })}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                account_id: e.target.value,
+                // Force re-pick if the destination now matches the source.
+                to_account_id:
+                  e.target.value === form.to_account_id
+                    ? ""
+                    : form.to_account_id,
+              })
+            }
           >
             <option value="">Select account</option>
             {accounts.map((a) => (
@@ -121,7 +147,28 @@ export default function TransactionModal({
           </Select>
         </div>
 
-        {form.type !== "transfer" && (
+        {isTransfer && (
+          <Select
+            label="To account"
+            required
+            value={form.to_account_id}
+            onChange={(e) => setForm({ ...form, to_account_id: e.target.value })}
+            error={
+              sameAccountError
+                ? "Pick a different account than the source."
+                : undefined
+            }
+          >
+            <option value="">Select destination account</option>
+            {destinationOptions.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </Select>
+        )}
+
+        {!isTransfer && (
           <Select
             label="Category"
             value={form.category_id}

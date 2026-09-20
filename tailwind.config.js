@@ -56,7 +56,7 @@ export default {
         'hairline-dark': '#2B3230',
       },
       fontFamily: {
-        display: ['"Fraunces"', 'ui-serif', 'Georgia', 'serif'],
+        display: ['"Bricolage Grotesque"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         sans: ['"Bricolage Grotesque"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"Poppins"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
